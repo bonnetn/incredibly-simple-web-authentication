@@ -3,7 +3,7 @@
 Adding authentication to your website is hard.
 
 Make a proper solution which is secure is notoriously hard. 
-Implementing [password storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html), [protection against password bruteforce/login enumeration](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html), [reset lost password feature](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html) or even  [https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html](multi-factor authentication) is notoriously hard to implement and get it right.
+Implementing [password storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html), [protection against password bruteforce/login enumeration](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html), [reset lost password feature](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html) or even  [multi-factor authentication](https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html) is notoriously hard to implement and get it right.
 
 It is often considered easier and more secure to use a pre-made solution that is proven secure.
 
