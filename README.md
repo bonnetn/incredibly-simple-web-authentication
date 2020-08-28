@@ -210,7 +210,7 @@ The email and username will also be attached as headers.
 The good thing about this proxy is that if you get a call to your backend, you already know that it is authenticated and you do not have to add any code to verify that. 
 You can focus on writing your business logic.
 
-## Part 5: Glueing things together and wrapping up.
+## Part 4: Glueing things together and wrapping up.
 
 Now that you have a HTML page that supports authentication and an API that is protected, you can link the two.
 
