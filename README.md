@@ -2,7 +2,6 @@
 
 Adding authentication to your website is hard.
 
-Make a proper solution which is secure is notoriously hard. 
 Implementing [password storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html), [protection against password bruteforce/login enumeration](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html), [reset lost password feature](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html) or even  [multi-factor authentication](https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html) is notoriously hard to implement and get it right.
 
 It is often considered easier and more secure to use a pre-made solution that is proven secure.
@@ -173,6 +172,7 @@ http {
           ngx.req.set_header("X-AUTH-SUB", res.sub) -- The most important header, will be the unique ID of the user that is authenticated.
           ngx.req.set_header("X-AUTH-EMAIL", res.email) -- Email of the user.
           ngx.req.set_header("X-AUTH-USERNAME", res.username) -- Username of the user.
+          ngx.req.set_header("X-AUTH-ROLES", res.realm_access.roles) -- Roles of the user.
 
           ngx.req.set_header("X-AUTH-AZP", res.azp)
           ngx.req.set_header("X-AUTH-IAT", res.iat)
@@ -206,6 +206,8 @@ Any call using an invalid token / no token will be rejected with a HTTP 403 erro
 The proxy will also attach headers to the request so your backend can identify the user. 
 You can use `X-AUTH-SUB` which is the [Universally unique identifier (UUID)](https://en.wikipedia.org/wiki/Universally_unique_identifier) of the user.
 The email and username will also be attached as headers.
+
+You will also get all the roles of the user for that realm using the `X-AUTH-ROLES` header (admin, moderator, user...).
 
 The good thing about this proxy is that if you get a call to your backend, you already know that it is authenticated and you do not have to add any code to verify that. 
 You can focus on writing your business logic.
