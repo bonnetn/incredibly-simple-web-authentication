@@ -227,3 +227,105 @@ req.setRequestHeader('Authorization', 'Bearer ' + keycloak.token); // <-- This i
 
 And you have a working secure authentication for your website and your API! 
 No need to re-implement any security function, you get a secure API out-of-the box!
+
+## Part 5: Enabling anonymous access to your API.
+
+You may want to allow unauthenticated users to access your API. The following configurationi introduces a new header "X-AUTH-ANONYMOUS" which is set to *true* for anonymous users (unauthenticated). 
+
+```
+events {
+  worker_connections 128;
+}
+
+http {
+
+  lua_package_path '~/lua/?.lua;;';
+
+  resolver 8.8.8.8;
+
+  lua_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+  lua_ssl_verify_depth 5;
+
+  # cache for validation results
+  lua_shared_dict introspection 10m;
+
+  server {
+    listen 80;
+
+    location / {
+
+      access_by_lua '
+
+          local opts = {
+             introspection_endpoint="https://auth.mydomain.com/auth/realms/<INSERT YOUR REALM NAME HERE>/protocol/openid-connect/token/introspect",
+             client_id="<INSERT YOUR CLIENT HERE>",
+             client_secret="<INSERT YOUR CLIENT SECRET HERE>",
+          }
+
+          -- Extract authorization header.
+          function get_authz_header()
+            local h = ngx.req.get_headers()
+            for k, v in pairs(h) do
+                if k == "authorization" then
+                  return v
+                end
+            end
+            return nil
+          end
+
+          local authz_header = get_authz_header()
+
+          local res, err
+          if authz_header == nil then
+            res = {}
+          else
+            -- call introspect for OAuth 2.0 Bearer Access Token validation
+            res, err = require("resty.openidc").introspect(opts)
+          end
+
+          if err then
+            ngx.status = 403
+            ngx.say(err)
+            ngx.exit(ngx.HTTP_FORBIDDEN)
+          end
+
+          -- We swap the authorization token by the extracted pieces of information.
+          ngx.req.set_header("Authorization", nil)
+
+          -- All these headers will be attached to the calls made to your backend.
+          ngx.req.set_header("X-AUTH-ANONYMOUS", tostring(authz_header == nil)) -- This header will be set to true if the user is not logged in.
+          ngx.req.set_header("X-AUTH-SUB", res.sub) -- The most important header, will be the unique ID of the user that is authenticated.
+          ngx.req.set_header("X-AUTH-EMAIL", res.email) -- Email of the user.
+          ngx.req.set_header("X-AUTH-USERNAME", res.username) -- Username of the user.
+
+          if res.realm_access  ~= nil then
+            ngx.req.set_header("X-AUTH-ROLES", res.realm_access.roles) -- Roles of the user.
+          else
+            ngx.req.set_header("X-AUTH-ROLES", nil) -- Clear the header for unauthenticated users. 
+          end
+
+          ngx.req.set_header("X-AUTH-AZP", res.azp)
+          ngx.req.set_header("X-AUTH-IAT", res.iat)
+          ngx.req.set_header("X-AUTH-ISS", res.iss)
+          ngx.req.set_header("X-AUTH-NONCE", res.nonce)
+          ngx.req.set_header("X-AUTH-FAMILY_NAME", res.family_name)
+          ngx.req.set_header("X-AUTH-AUTH_TIME", res.auth_time)
+          ngx.req.set_header("X-AUTH-ACTIVE", res.active)
+          ngx.req.set_header("X-AUTH-EMAIL_VERIFIED", res.email_verified)
+          ngx.req.set_header("X-AUTH-SCOPE", res.scope)
+          ngx.req.set_header("X-AUTH-AUD", res.aud)
+          ngx.req.set_header("X-AUTH-SESSION_STATE", res.session_state)
+          ngx.req.set_header("X-AUTH-ACR", res.acr)
+          ngx.req.set_header("X-AUTH-CLIENT_ID", res.client_id)
+          ngx.req.set_header("X-AUTH-GIVEN_NAME", res.given_name)
+          ngx.req.set_header("X-AUTH-EXP", res.exp)
+          ngx.req.set_header("X-AUTH-PREFERRED_USERNAME", res.preferred_username)
+          ngx.req.set_header("X-AUTH-JTI", res.jti)
+          ngx.req.set_header("X-AUTH-NAME", res.name)
+          ngx.req.set_header("X-AUTH-TYP", res.typ)
+      ';
+      proxy_pass http://sample-app:8080/; 
+    }
+  }
+}
+```
