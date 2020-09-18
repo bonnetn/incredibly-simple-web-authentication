@@ -230,7 +230,7 @@ No need to re-implement any security function, you get a secure API out-of-the b
 
 ## Part 5: Enabling anonymous access to your API.
 
-You may want to allow unauthenticated users to access your API. The following configurationi introduces a new header "X-AUTH-ANONYMOUS" which is set to *true* for anonymous users (unauthenticated). 
+You may want to allow unauthenticated users to access your API. The following configuration introduces a new header **"X-AUTH-ANONYMOUS"** which is set to *true* for anonymous users (unauthenticated). All the other *x-auth-...* headers will be cleared for unauthenticated users.
 
 ```
 events {
